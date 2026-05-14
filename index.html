@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SandeshBot – AI-Powered WhatsApp Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --green: #25D366;
+    --green-dark: #128C7E;
+    --green-light: #dcf8c6;
+    --green-mid: #075E54;
+    --white: #ffffff;
+    --offwhite: #f7faf7;
+    --text: #0d1f0d;
+    --muted: #4a6a4a;
+    --card-bg: #ffffff;
+    --shadow: 0 8px 40px rgba(18,140,126,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--offwhite);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── NAVBAR ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5vw;
+    height: 70px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(37,211,102,0.15);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.5rem;
+    color: var(--green-dark);
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+  .nav-logo .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    text-decoration: none; color: var(--muted);
+    font-size: 0.95rem; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--green-dark); }
+  .nav-cta {
+    background: var(--green);
+    color: white; border: none; border-radius: 30px;
+    padding: 10px 24px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .nav-cta:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { width: 24px; height: 2px; background: var(--green-dark); border-radius: 2px; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 100px 5vw 60px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e8faf0 0%, #f7faf7 60%, #d4f5e2 100%);
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -120px; right: -120px;
+    width: 520px; height: 520px;
+    background: radial-gradient(circle, rgba(37,211,102,0.18) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulse 6s ease-in-out infinite;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -80px; left: -80px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(7,94,84,0.10) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulse 8s ease-in-out infinite reverse;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+
+  .hero-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 2; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green-light); color: var(--green-dark);
+    border-radius: 30px; padding: 6px 16px; font-size: 0.82rem; font-weight: 600;
+    margin-bottom: 24px;
+    animation: fadeInDown 0.7s ease both;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+    font-weight: 800; line-height: 1.12;
+    color: var(--text);
+    animation: fadeInDown 0.8s ease 0.1s both;
+  }
+  .hero h1 span { color: var(--green); }
+  .hero p {
+    margin-top: 20px; font-size: 1.1rem; color: var(--muted);
+    line-height: 1.7; max-width: 480px;
+    animation: fadeInDown 0.8s ease 0.2s both;
+  }
+  .hero-btns {
+    margin-top: 36px; display: flex; gap: 16px; flex-wrap: wrap;
+    animation: fadeInDown 0.8s ease 0.3s both;
+  }
+  .btn-primary {
+    background: var(--green); color: white;
+    border: none; border-radius: 50px; padding: 14px 32px;
+    font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 24px rgba(37,211,102,0.35);
+  }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(37,211,102,0.4); }
+  .btn-outline {
+    background: transparent; color: var(--green-dark);
+    border: 2px solid var(--green); border-radius: 50px; padding: 13px 30px;
+    font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { background: var(--green-light); }
+
+  /* Phone Mockup */
+  .hero-visual { display: flex; justify-content: center; align-items: center; animation: fadeInRight 1s ease 0.2s both; }
+  .phone-mockup {
+    width: 260px;
+    background: #111;
+    border-radius: 36px;
+    padding: 12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 2px #222;
+    position: relative;
+  }
+  .phone-screen {
+    background: #e5ddd5;
+    border-radius: 28px;
+    overflow: hidden;
+    min-height: 480px;
+  }
+  .phone-header {
+    background: var(--green-mid);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 10px;
+    color: white;
+  }
+  .phone-avatar { width: 36px; height: 36px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .phone-header-info { flex: 1; }
+  .phone-header-info strong { font-size: 0.9rem; display: block; }
+  .phone-header-info small { font-size: 0.7rem; opacity: 0.8; }
+  .chat-area { padding: 14px 10px; display: flex; flex-direction: column; gap: 10px; }
+  .msg {
+    max-width: 80%; padding: 8px 12px; border-radius: 10px;
+    font-size: 0.78rem; line-height: 1.5; position: relative;
+    animation: msgPop 0.4s ease both;
+  }
+  .msg-in { background: white; align-self: flex-start; border-bottom-left-radius: 2px; }
+  .msg-out { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
+  .msg-time { font-size: 0.6rem; color: #888; text-align: right; margin-top: 4px; }
+  @keyframes msgPop { from{opacity:0;transform:scale(0.85);} to{opacity:1;transform:scale(1);} }
+  .msg:nth-child(1){animation-delay:0.4s}
+  .msg:nth-child(2){animation-delay:0.9s}
+  .msg:nth-child(3){animation-delay:1.4s}
+  .msg:nth-child(4){animation-delay:1.9s}
+  .msg:nth-child(5){animation-delay:2.4s}
+  .typing { background: white; align-self: flex-start; padding: 10px 14px; border-radius: 10px; display: flex; gap: 4px; animation: msgPop 0.4s ease 2.9s both; }
+  .dot { width: 7px; height: 7px; background: #aaa; border-radius: 50%; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2){animation-delay:0.2s} .dot:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+
+  @keyframes fadeInDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+  @keyframes fadeInRight { from{opacity:0;transform:translateX(30px);} to{opacity:1;transform:translateX(0);} }
+
+  /* ── SECTION BASE ── */
+  section { padding: 90px 5vw; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .section-tag {
+    display: inline-block; background: var(--green-light); color: var(--green-dark);
+    border-radius: 30px; padding: 5px 16px; font-size: 0.8rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(2rem,3.5vw,2.8rem);
+    font-weight: 800; line-height: 1.2; color: var(--text);
+  }
+  .section-title span { color: var(--green); }
+  .section-sub { margin-top: 14px; font-size: 1.05rem; color: var(--muted); max-width: 540px; line-height: 1.7; }
+
+  /* ── FEATURES ── */
+  #features { background: white; }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px; margin-top: 56px;
+  }
+  .feature-card {
+    background: var(--offwhite);
+    border: 1.5px solid rgba(37,211,102,0.15);
+    border-radius: 20px; padding: 32px 28px;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  }
+  .feature-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: var(--green); }
+  .feature-icon {
+    width: 52px; height: 52px; background: var(--green-light);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 18px;
+  }
+  .feature-card h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+  .feature-card p { font-size: 0.93rem; color: var(--muted); line-height: 1.65; }
+
+  /* ── HOW IT WORKS ── */
+  #how { background: var(--offwhite); }
+  .steps { margin-top: 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 32px; position: relative; }
+  .step {
+    text-align: center; padding: 28px 20px;
+    background: white; border-radius: 20px;
+    border: 1.5px solid rgba(37,211,102,0.12);
+    position: relative;
+  }
+  .step-num {
+    width: 48px; height: 48px; background: var(--green);
+    border-radius: 50%; color: white; font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.2rem; margin: 0 auto 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+  .step p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── PRICING ── */
+  #pricing { background: white; }
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+    gap: 28px; margin-top: 56px; align-items: start;
+  }
+  .price-card {
+    border-radius: 24px; padding: 36px 30px;
+    border: 2px solid rgba(37,211,102,0.15);
+    background: var(--offwhite);
+    transition: transform 0.25s, box-shadow 0.25s;
+    position: relative;
+  }
+  .price-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+  .price-card.featured {
+    background: var(--green-mid); color: white; border-color: var(--green-mid);
+  }
+  .price-card.featured .price-sub, .price-card.featured li, .price-card.featured .plan-name { color: rgba(255,255,255,0.85); }
+  .badge-popular {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: white; border-radius: 20px;
+    padding: 4px 16px; font-size: 0.75rem; font-weight: 700;
+  }
+  .plan-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 8px; color: var(--muted); }
+  .price-amount { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; line-height: 1; }
+  .price-amount span { font-size: 1.1rem; font-weight: 400; }
+  .price-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; margin-top: 4px; }
+  .price-list { list-style: none; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+  .price-list li { font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+  .price-list li::before { content: '✓'; color: var(--green); font-weight: 700; font-size: 0.95rem; }
+  .price-card.featured .price-list li::before { color: var(--green-light); }
+  .btn-plan {
+    width: 100%; padding: 13px; border-radius: 50px; font-size: 0.95rem;
+    font-weight: 700; cursor: pointer; text-align: center; border: none;
+    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-plan-outline { background: transparent; border: 2px solid var(--green); color: var(--green-dark); }
+  .btn-plan-outline:hover { background: var(--green); color: white; }
+  .btn-plan-solid { background: var(--green); color: white; }
+  .btn-plan-solid:hover { background: #1ebe5a; }
+  .btn-plan-white { background: white; color: var(--green-mid); }
+  .btn-plan-white:hover { background: var(--green-light); }
+
+  /* ── CONTACT ── */
+  #contact { background: linear-gradient(135deg, var(--green-mid) 0%, var(--green-dark) 100%); color: white; }
+  #contact .section-title { color: white; }
+  #contact .section-sub { color: rgba(255,255,255,0.75); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 56px; align-items: start; }
+  .contact-info { display: flex; flex-direction: column; gap: 24px; }
+  .contact-item { display: flex; align-items: flex-start; gap: 16px; }
+  .contact-icon {
+    width: 46px; height: 46px; min-width: 46px;
+    background: rgba(255,255,255,0.12); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  }
+  .contact-item h4 { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 4px; }
+  .contact-item a, .contact-item p { color: rgba(255,255,255,0.8); font-size: 0.95rem; text-decoration: none; }
+  .contact-item a:hover { color: var(--green-light); }
+  .contact-form { background: rgba(255,255,255,0.08); border-radius: 20px; padding: 32px; backdrop-filter: blur(10px); }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 7px; color: rgba(255,255,255,0.8); }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; padding: 12px 16px;
+    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 12px; color: white; font-size: 0.93rem; font-family: 'DM Sans', sans-serif;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.45); }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--green); }
+  .form-group select option { background: var(--green-mid); }
+  .form-group textarea { resize: vertical; min-height: 100px; }
+  .btn-submit {
+    width: 100%; padding: 14px; background: var(--green); color: white;
+    border: none; border-radius: 50px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-submit:hover { background: #1ebe5a; transform: translateY(-1px); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--text); color: rgba(255,255,255,0.6);
+    padding: 40px 5vw; text-align: center;
+    font-size: 0.88rem;
+  }
+  footer .footer-logo {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem;
+    color: var(--green); margin-bottom: 12px;
+  }
+  footer p { line-height: 1.8; }
+  footer a { color: var(--green); text-decoration: none; }
+
+  /* ── WHATSAPP FLOAT ── */
+  .wa-float {
+    position: fixed; bottom: 28px; right: 28px; z-index: 999;
+    background: var(--green); color: white; border-radius: 50%;
+    width: 58px; height: 58px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.7rem; box-shadow: 0 6px 24px rgba(37,211,102,0.5);
+    text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
+    animation: waBounce 2s ease-in-out infinite;
+  }
+  .wa-float:hover { transform: scale(1.1); box-shadow: 0 10px 32px rgba(37,211,102,0.6); }
+  @keyframes waBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+
+  /* ── STATS ── */
+  .stats-bar {
+    background: var(--green-mid); color: white;
+    padding: 36px 5vw;
+  }
+  .stats-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; text-align: center;
+  }
+  .stat h3 { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--green-light); }
+  .stat p { font-size: 0.88rem; opacity: 0.8; margin-top: 4px; }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px){
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .stats-inner { grid-template-columns: repeat(2,1fr); }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="logo-icon">💬</span>
+    SandeshBot
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Get Started →</a>
+  <div class="hamburger" onclick="this.classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">🤖 AI-Powered WhatsApp Automation</div>
+      <h1>Automate Your <span>WhatsApp</span> Business Like Never Before</h1>
+      <p>SandeshBot handles your customer conversations 24/7 — smart auto-replies, instant chatbot responses, and seamless business automation on WhatsApp.</p>
+      <div class="hero-btns">
+        <a href="#contact" class="btn-primary">🚀 Start Free Trial</a>
+        <a href="#features" class="btn-outline">See Features</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-avatar">🤖</div>
+            <div class="phone-header-info">
+              <strong>SandeshBot</strong>
+              <small>🟢 Online</small>
+            </div>
+          </div>
+          <div class="chat-area">
+            <div class="msg msg-in">Hi! I need help with my order 📦<div class="msg-time">10:01 AM</div></div>
+            <div class="msg msg-out">Hello! 👋 I'm SandeshBot. Please share your order ID and I'll check it right away!<div class="msg-time">10:01 AM</div></div>
+            <div class="msg msg-in">Order #SB2024-7851<div class="msg-time">10:02 AM</div></div>
+            <div class="msg msg-out">✅ Your order is out for delivery! ETA: Today 4–6 PM. Track here: sandeshbot.ai/track<div class="msg-time">10:02 AM</div></div>
+            <div class="msg msg-in">Amazing! Thank you 🙏<div class="msg-time">10:02 AM</div></div>
+            <div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><h3>10K+</h3><p>Messages Automated Daily</p></div>
+    <div class="stat"><h3>500+</h3><p>Happy Businesses</p></div>
+    <div class="stat"><h3>99.9%</h3><p>Uptime Guaranteed</p></div>
+    <div class="stat"><h3>24/7</h3><p>Bot Always Active</p></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <span class="section-tag">✨ Features</span>
+    <h2 class="section-title">Everything You Need to <span>Automate</span> WhatsApp</h2>
+    <p class="section-sub">SandeshBot gives your business the power of AI-driven conversations, so you never miss a customer again.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Smart Auto-Reply</h3>
+        <p>Instantly respond to customer queries 24/7 with intelligent, context-aware automated replies — no human needed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>AI Chatbot</h3>
+        <p>Deploy a fully trained AI chatbot on WhatsApp that understands natural language and handles complex conversations.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📢</div>
+        <h3>Broadcast Messaging</h3>
+        <p>Send targeted messages, promotions, and updates to your entire customer base with a single click.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Analytics Dashboard</h3>
+        <p>Track message delivery, open rates, customer engagement, and bot performance with real-time analytics.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <h3>Easy Integration</h3>
+        <p>Connect SandeshBot with your existing CRM, e-commerce store, or any business tool via our simple API.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Secure & Reliable</h3>
+        <p>Built on WhatsApp Business API with enterprise-grade security, data privacy, and 99.9% uptime SLA.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-inner">
+    <span class="section-tag">⚙️ How It Works</span>
+    <h2 class="section-title">Set Up in <span>3 Simple Steps</span></h2>
+    <p class="section-sub">Get SandeshBot running on your WhatsApp business number in minutes — no coding required.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Connect Your Number</h3>
+        <p>Link your WhatsApp Business number to SandeshBot using our guided setup wizard — takes less than 5 minutes.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Train Your Bot</h3>
+        <p>Add your FAQs, product info, and business rules. Our AI learns your business and starts responding intelligently.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Go Live & Grow</h3>
+        <p>Activate the bot and watch it handle thousands of customer conversations while you focus on growing your business.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Monitor & Improve</h3>
+        <p>Use real-time dashboards to track performance, tweak responses, and continuously improve your bot's effectiveness.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-inner">
+    <span class="section-tag">💰 Pricing</span>
+    <h2 class="section-title">Simple, <span>Transparent</span> Pricing</h2>
+    <p class="section-sub">Choose a plan that fits your business. Scale up anytime as your business grows.</p>
+    <div class="pricing-grid">
+
+      <div class="price-card">
+        <div class="plan-name">BASIC PLAN</div>
+        <div class="price-amount">$99<span>/mo</span></div>
+        <div class="price-sub">Perfect for small businesses getting started</div>
+        <ul class="price-list">
+          <li>AI auto-reply chatbot</li>
+          <li>Basic analytics dashboard</li>
+          <li>Email support</li>
+          <li>WhatsApp broadcast</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="document.getElementById('contact').scrollIntoView()">Get Basic Plan</button>
+      </div>
+
+      <div class="price-card featured">
+        <div class="badge-popular">🌟 MOST POPULAR</div>
+        <div class="plan-name">PRO PLAN</div>
+        <div class="price-amount">$149<span>/mo</span></div>
+        <div class="price-sub">For growing businesses with higher volume</div>
+        <ul class="price-list">
+          <li>Advanced AI chatbot</li>
+          <li>Full analytics & reports</li>
+          <li>Priority 24/7 support</li>
+          <li>CRM integration</li>
+          <li>Custom bot training</li>
+        </ul>
+        <button class="btn-plan btn-plan-white" onclick="document.getElementById('contact').scrollIntoView()">Get Pro Plan</button>
+      </div>
+
+      <div class="price-card">
+        <div class="plan-name">CUSTOM PLAN</div>
+        <div class="price-amount" style="font-size:2rem;">Custom</div>
+        <div class="price-sub">Pricing based on your daily WhatsApp usage volume</div>
+        <ul class="price-list">
+          <li>Unlimited messages/day</li>
+          <li>Enterprise AI chatbot</li>
+          <li>Unlimited numbers</li>
+          <li>Dedicated account manager</li>
+          <li>Custom integrations</li>
+          <li>White-label option</li>
+          <li>SLA guarantee</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="document.getElementById('contact').scrollIntoView()">Contact for Pricing</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <span class="section-tag" style="background:rgba(255,255,255,0.15);color:white;">📩 Contact Us</span>
+    <h2 class="section-title">Let's Get Your <span>Business Automated</span></h2>
+    <p class="section-sub">Reach out and our team will help you set up SandeshBot for your business today.</p>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-item">
+          <div class="contact-icon">📱</div>
+          <div>
+            <h4>WhatsApp / Phone</h4>
+            <a href="https://wa.me/918765083276" target="_blank">+91 8765 083 276</a>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">✉️</div>
+          <div>
+            <h4>Email</h4>
+            <a href="mailto:sandeshbot.ai@gmail.com">sandeshbot.ai@gmail.com</a>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">⏰</div>
+          <div>
+            <h4>Support Hours</h4>
+            <p>Mon–Sat: 9:00 AM – 7:00 PM IST<br/>Bot support: 24/7</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">🌐</div>
+          <div>
+            <h4>Chat with us instantly</h4>
+            <a href="https://wa.me/918765083276?text=Hi%20SandeshBot!%20I%20want%20to%20know%20more%20about%20your%20WhatsApp%20automation%20service." target="_blank">Click to open WhatsApp →</a>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" placeholder="Enter your name"/>
+        </div>
+        <div class="form-group">
+          <label>Phone / WhatsApp Number</label>
+          <input type="tel" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="your@email.com"/>
+        </div>
+        <div class="form-group">
+          <label>Select Plan</label>
+          <select>
+            <option value="">Choose a plan...</option>
+            <option>Basic – $99/month</option>
+            <option>Pro – $149/month</option>
+            <option>Custom – Based on usage</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea placeholder="Tell us about your business and WhatsApp automation needs..."></textarea>
+        </div>
+        <button class="btn-submit" onclick="sendToWhatsApp()">🚀 Send via WhatsApp</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">💬 SandeshBot</div>
+  <p>AI-Powered WhatsApp Automation System<br/>
+  📞 <a href="tel:+918765083276">+91 8765 083 276</a> &nbsp;|&nbsp;
+  ✉️ <a href="mailto:sandeshbot.ai@gmail.com">sandeshbot.ai@gmail.com</a></p>
+  <p style="margin-top:16px;font-size:0.8rem;">© 2024 SandeshBot. All rights reserved. Built with ❤️ for businesses in India & beyond.</p>
+</footer>
+
+<!-- WHATSAPP FLOAT BUTTON -->
+<a class="wa-float" href="https://wa.me/918765083276?text=Hi%20SandeshBot!%20I'm%20interested%20in%20WhatsApp%20automation." target="_blank" title="Chat on WhatsApp">💬</a>
+
+<script>
+function sendToWhatsApp() {
+  const name = document.querySelectorAll('.contact-form input')[0].value || 'Customer';
+  const phone = document.querySelectorAll('.contact-form input')[1].value || '';
+  const plan = document.querySelector('.contact-form select').value || 'Not selected';
+  const msg = document.querySelector('.contact-form textarea').value || '';
+  const text = `Hi SandeshBot! 👋\n\nName: ${name}\nPhone: ${phone}\nPlan: ${plan}\nMessage: ${msg}`;
+  window.open(`https://wa.me/918765083276?text=${encodeURIComponent(text)}`, '_blank');
+}
+</script>
+</body>
+</html>
